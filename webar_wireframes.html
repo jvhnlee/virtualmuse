@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museum WebAR Wireframes</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: sans-serif; }
+    #root { width: 100%; max-width: 390px; height: 844px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; position: relative; }
+    ::-webkit-scrollbar { display: none; }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const Button = ({ children, onClick, variant = 'primary', className = '' }) => {
+      const baseStyle = "w-full py-3 px-4 rounded font-bold text-center cursor-pointer transition-colors";
+      const variants = {
+        primary: "bg-[#212121] text-white hover:bg-black",
+        secondary: "bg-[#e0e0e0] text-[#212121] border border-[#9e9e9e] hover:bg-[#c0c0c0]",
+        ghost: "text-[#212121] underline hover:text-[#9e9e9e]"
+      };
+      return <button className={`${baseStyle} ${variants[variant]} ${className}`} onClick={onClick}>{children}</button>;
+    };
+
+    const Header = ({ title, onBack, rightIcon }) => (
+      <div className="flex justify-between items-center p-4 border-b border-[#e0e0e0] bg-white z-10 shrink-0">
+        {onBack ? <button onClick={onBack} className="text-[#212121] font-bold p-2">&larr;</button> : <div className="w-8"></div>}
+        <h1 className="text-lg font-bold text-[#212121] text-center flex-1">{title}</h1>
+        {rightIcon ? <div className="p-2">{rightIcon}</div> : <div className="w-8"></div>}
+      </div>
+    );
+
+    const BottomNav = ({ navigate, current }) => (
+      <div className="flex justify-around items-center p-4 border-t border-[#e0e0e0] bg-white mt-auto shrink-0 pb-6">
+        <button onClick={() => navigate('gallery')} className={`flex flex-col items-center ${current==='gallery'?'text-[#212121] font-bold':'text-[#9e9e9e]'}`}>
+          <div className={`w-6 h-6 border-2 ${current==='gallery'?'border-[#212121]':'border-[#9e9e9e]'} rounded mb-1`}></div>Gallery
+        </button>
+        <button onClick={() => navigate('scanner')} className="flex flex-col items-center">
+          <div className="w-12 h-12 bg-[#212121] rounded-full text-white flex items-center justify-center -mt-8 border-4 border-white shadow-lg">QR</div>
+          <span className="text-[#212121] text-xs font-bold mt-1">Scan</span>
+        </button>
+        <button onClick={() => navigate('profile')} className={`flex flex-col items-center ${current==='profile'?'text-[#212121] font-bold':'text-[#9e9e9e]'}`}>
+          <div className={`w-6 h-6 border-2 ${current==='profile'?'border-[#212121]':'border-[#9e9e9e]'} rounded-full mb-1`}></div>Profile
+        </button>
+      </div>
+    );
+
+    const WireframeImage = ({ text, className }) => (
+      <div className={`bg-[#e0e0e0] flex items-center justify-center text-[#9e9e9e] font-bold text-center p-4 ${className}`}>
+        {text}
+      </div>
+    );
+
+    // 1. Landing
+    const Landing = ({ navigate }) => (
+      <div className="flex flex-col h-full p-6 justify-center items-center bg-white fade-in overflow-y-auto">
+        <div className="w-32 h-32 bg-[#e0e0e0] rounded-full flex items-center justify-center mb-8"><span className="text-[#212121] font-bold text-xl">Logo</span></div>
+        <h1 className="text-2xl font-bold text-[#212121] mb-4">Museum WebAR</h1>
+        <p className="text-[#9e9e9e] mb-12 text-center">Discover the sound of history through interactive augmented reality.</p>
+        <div className="w-full space-y-4">
+          <Button onClick={() => navigate('login')}>Login</Button>
+          <Button variant="secondary" onClick={() => navigate('signup')}>Create Account</Button>
+          <Button variant="ghost" onClick={() => navigate('onboarding1')}>Skip & Explore</Button>
+        </div>
+      </div>
+    );
+
+    // 2. Login
+    const Login = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <Header title="Login" onBack={() => navigate('landing')} />
+        <div className="p-6 flex-1 flex flex-col justify-center">
+          <div className="space-y-4 mb-8">
+            <div>
+              <label className="block text-sm font-bold text-[#212121] mb-1">Email</label>
+              <input type="text" className="w-full border border-[#9e9e9e] rounded p-3 bg-[#f9f9f9]" placeholder="Enter your email" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-[#212121] mb-1">Password</label>
+              <input type="password" className="w-full border border-[#9e9e9e] rounded p-3 bg-[#f9f9f9]" placeholder="Enter password" />
+            </div>
+          </div>
+          <Button onClick={() => navigate('gallery')}>Log In</Button>
+          <Button variant="ghost" onClick={() => navigate('signup')} className="mt-4">Don't have an account?</Button>
+        </div>
+      </div>
+    );
+
+    // 3. SignUp
+    const SignUp = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <Header title="Sign Up" onBack={() => navigate('landing')} />
+        <div className="p-6 flex-1 flex flex-col justify-center">
+          <div className="space-y-4 mb-8">
+            <div>
+              <label className="block text-sm font-bold text-[#212121] mb-1">Name</label>
+              <input type="text" className="w-full border border-[#9e9e9e] rounded p-3 bg-[#f9f9f9]" placeholder="Your name" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-[#212121] mb-1">Email</label>
+              <input type="text" className="w-full border border-[#9e9e9e] rounded p-3 bg-[#f9f9f9]" placeholder="Your email" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-[#212121] mb-1">Password</label>
+              <input type="password" className="w-full border border-[#9e9e9e] rounded p-3 bg-[#f9f9f9]" placeholder="Create password" />
+            </div>
+          </div>
+          <Button onClick={() => navigate('onboarding1')}>Create Account</Button>
+        </div>
+      </div>
+    );
+
+    // 4. Onboarding1
+    const Onboarding1 = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <div className="flex-1 flex flex-col p-6 items-center justify-center text-center">
+          <WireframeImage text="Illustration: QR Code Stand" className="w-full h-64 rounded mb-8" />
+          <h2 className="text-xl font-bold text-[#212121] mb-4">Find the QR Codes</h2>
+          <p className="text-[#9e9e9e]">Look for the AR stands next to traditional instruments around the museum.</p>
+        </div>
+        <div className="p-6">
+          <Button onClick={() => navigate('onboarding2')}>Next</Button>
+        </div>
+      </div>
+    );
+
+    // 5. Onboarding2
+    const Onboarding2 = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <div className="flex-1 flex flex-col p-6 items-center justify-center text-center">
+          <WireframeImage text="Illustration: 3D Interaction" className="w-full h-64 rounded mb-8" />
+          <h2 className="text-xl font-bold text-[#212121] mb-4">Play History</h2>
+          <p className="text-[#9e9e9e]">Scan the code to bring the instrument to life. Strum, hit, or play them on your device.</p>
+        </div>
+        <div className="p-6">
+          <Button onClick={() => navigate('cam_permission')}>Get Started</Button>
+        </div>
+      </div>
+    );
+
+    // 6. CameraPermission
+    const CameraPermission = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <Header title="Permissions" onBack={() => navigate('onboarding2')} />
+        <div className="flex-1 flex flex-col p-6 items-center justify-center text-center">
+          <div className="w-24 h-24 bg-[#e0e0e0] rounded-full flex items-center justify-center mb-6">
+            <span className="text-[#212121] font-bold">Icon: Cam</span>
+          </div>
+          <h2 className="text-xl font-bold text-[#212121] mb-4">Camera Access Required</h2>
+          <p className="text-[#9e9e9e] mb-8">We need access to your camera to scan QR codes and display WebAR models.</p>
+          <Button onClick={() => navigate('scanner')} className="mb-2">Allow Camera</Button>
+          <Button variant="ghost" onClick={() => navigate('error')}>Deny</Button>
+        </div>
+      </div>
+    );
+
+    // 7. Scanner
+    const Scanner = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-[#212121] fade-in relative">
+        <Header title="Scan Instrument" onBack={() => navigate('gallery')} />
+        <div className="flex-1 relative flex items-center justify-center cursor-pointer" onClick={() => navigate('loading_ar')}>
+          <div className="absolute inset-0 bg-black opacity-50"></div>
+          <div className="w-64 h-64 border-4 border-[#e0e0e0] relative z-10 flex flex-col items-center justify-center">
+            <span className="text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded mb-2">Click to scan</span>
+            <div className="w-full h-1 bg-white opacity-50 animate-pulse"></div>
+          </div>
+          <div className="absolute bottom-10 z-10 w-full text-center text-white px-6">
+            Align the QR code within the frame
+          </div>
+        </div>
+      </div>
+    );
+
+    // 8. LoadingAR
+    const LoadingAR = ({ navigate }) => {
+      useEffect(() => {
+        const timer = setTimeout(() => navigate('model_360'), 1500);
+        return () => clearTimeout(timer);
+      }, []);
+      return (
+        <div className="flex flex-col h-full bg-white fade-in items-center justify-center">
+          <div className="w-16 h-16 border-4 border-[#e0e0e0] border-t-[#212121] rounded-full animate-spin mb-4"></div>
+          <h2 className="text-xl font-bold text-[#212121]">Loading AR Experience...</h2>
+          <p className="text-[#9e9e9e]">Fetching 3D Model</p>
+        </div>
+      );
+    };
+
+    // 9. Model360View
+    const Model360View = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-[#f5f5f5] fade-in relative">
+        <div className="absolute top-4 left-4 z-10">
+          <button onClick={() => navigate('scanner')} className="bg-white px-3 py-2 rounded shadow font-bold text-[#212121]">&larr;</button>
+        </div>
+        <div className="absolute top-4 right-4 z-10">
+          <button onClick={() => navigate('instrument_info')} className="bg-white px-3 py-2 rounded shadow font-bold text-[#212121]">i</button>
+        </div>
+        
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <WireframeImage text="3D Model Viewer (Drag to rotate 360°)" className="w-full h-96 bg-white shadow-lg rounded-xl border border-[#e0e0e0]" />
+          <div className="mt-4 text-[#9e9e9e] text-sm font-bold">Swipe finger to view all angles</div>
+        </div>
+
+        <div className="p-6 bg-white rounded-t-3xl shadow-[0_-4px_10px_rgba(0,0,0,0.05)] text-center flex flex-col items-center">
+          <h2 className="text-xl font-bold text-[#212121] mb-2">Guzheng (String)</h2>
+          <p className="text-[#9e9e9e] text-sm mb-6">Traditional Chinese Plucked Zither</p>
+          
+          <button 
+            onClick={() => navigate('fixed_string')} 
+            className="w-20 h-20 bg-[#212121] rounded-full flex flex-col items-center justify-center text-white shadow-lg cursor-pointer">
+            <span className="text-2xl mb-1">&#9658;</span>
+            <span className="text-xs font-bold">PLAY</span>
+          </button>
+        </div>
+      </div>
+    );
+
+    // 10. FixedViewString (Swipe to strum)
+    const FixedViewString = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-[#212121] fade-in relative">
+        <div className="absolute top-4 left-4 z-10">
+          <button onClick={() => navigate('model_360')} className="bg-white px-3 py-2 rounded font-bold text-[#212121]">&larr;</button>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-white relative">
+          <WireframeImage text="Fixed Front View: Strings" className="w-full h-[60%] bg-[#424242] border border-[#757575] rounded text-white" />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-white border-2 border-dashed border-white p-4 rounded-lg bg-black bg-opacity-30">
+              &#8596; Swipe across to strum
+            </div>
+          </div>
+        </div>
+        <div className="p-4 flex justify-between bg-[#121212] items-center">
+          <button onClick={() => navigate('fixed_percussion')} className="text-[#9e9e9e] underline text-sm">Switch: Percussion</button>
+          <button onClick={() => navigate('audio_feedback')} className="bg-white text-black px-4 py-2 rounded font-bold">Finish Playing</button>
+        </div>
+      </div>
+    );
+
+    // 11. FixedViewPercussion (Hit to drum)
+    const FixedViewPercussion = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-[#212121] fade-in relative">
+        <div className="absolute top-4 left-4 z-10">
+          <button onClick={() => navigate('model_360')} className="bg-white px-3 py-2 rounded font-bold text-[#212121]">&larr;</button>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-white relative">
+          <WireframeImage text="Fixed Front View: Drum Heads" className="w-full h-[60%] bg-[#424242] border border-[#757575] rounded-full text-white" />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-white border-2 border-dashed border-white p-4 rounded-lg bg-black bg-opacity-30">
+              &#10003; Tap/Hit to play
+            </div>
+          </div>
+        </div>
+        <div className="p-4 flex justify-between bg-[#121212] items-center">
+          <button onClick={() => navigate('fixed_wind')} className="text-[#9e9e9e] underline text-sm">Switch: Wind</button>
+          <button onClick={() => navigate('audio_feedback')} className="bg-white text-black px-4 py-2 rounded font-bold">Finish Playing</button>
+        </div>
+      </div>
+    );
+
+    // 12. FixedViewWind (Hold to play)
+    const FixedViewWind = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-[#212121] fade-in relative">
+        <div className="absolute top-4 left-4 z-10">
+          <button onClick={() => navigate('model_360')} className="bg-white px-3 py-2 rounded font-bold text-[#212121]">&larr;</button>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-white relative">
+          <WireframeImage text="Fixed Front View: Flute Holes" className="w-24 h-[80%] bg-[#424242] border border-[#757575] rounded-full text-white" />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-white border-2 border-dashed border-white p-4 rounded-lg bg-black bg-opacity-30 flex flex-col items-center text-center">
+               Hold fingers on holes
+            </div>
+          </div>
+        </div>
+        <div className="p-4 flex justify-between bg-[#121212] items-center">
+          <button onClick={() => navigate('fixed_string')} className="text-[#9e9e9e] underline text-sm">Switch: String</button>
+          <button onClick={() => navigate('audio_feedback')} className="bg-white text-black px-4 py-2 rounded font-bold">Finish Playing</button>
+        </div>
+      </div>
+    );
+
+    // 13. InstrumentInfo
+    const InstrumentInfo = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in relative">
+        <Header title="Details" onBack={() => navigate('model_360')} />
+        <div className="flex-1 overflow-y-auto p-6">
+          <WireframeImage text="Instrument Photo" className="w-full h-48 rounded-lg mb-6" />
+          <h2 className="text-2xl font-bold text-[#212121] mb-2">Guzheng</h2>
+          <div className="flex space-x-2 mb-6">
+            <span className="px-3 py-1 bg-[#e0e0e0] text-[#212121] rounded-full text-xs font-bold">String</span>
+            <span className="px-3 py-1 bg-[#e0e0e0] text-[#212121] rounded-full text-xs font-bold">China</span>
+          </div>
+          <h3 className="text-lg font-bold text-[#212121] mb-2">History</h3>
+          <p className="text-[#757575] leading-relaxed mb-6">
+            The guzheng is a Chinese plucked zither. It has 21, 25, or 26 strings, is 64 inches long, and is tuned in a major pentatonic scale.
+          </p>
+          <h3 className="text-lg font-bold text-[#212121] mb-2">How it's played</h3>
+          <p className="text-[#757575] leading-relaxed">
+            Players wear finger picks on one or both hands to pluck the strings, while the left hand alters the pitch and adds vibrato.
+          </p>
+        </div>
+      </div>
+    );
+
+    // 14. AudioFeedback
+    const AudioFeedback = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <Header title="Your Session" onBack={() => navigate('gallery')} />
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-20 h-20 bg-[#212121] rounded-full flex items-center justify-center mb-6">
+             <span className="text-white text-2xl font-bold">&#10003;</span>
+          </div>
+          <h2 className="text-2xl font-bold text-[#212121] mb-2">Great Performance!</h2>
+          <p className="text-[#9e9e9e] mb-8">You've unlocked the Guzheng Master badge.</p>
+          
+          <div className="w-full bg-[#e0e0e0] p-4 rounded-lg mb-8 flex items-center space-x-4">
+             <button className="w-10 h-10 bg-[#212121] text-white rounded-full flex items-center justify-center font-bold">&#9658;</button>
+             <div className="flex-1 h-2 bg-[#9e9e9e] rounded-full relative">
+               <div className="absolute top-0 left-0 h-full w-1/3 bg-[#212121] rounded-full"></div>
+             </div>
+             <span className="text-xs font-bold text-[#212121]">0:15</span>
+          </div>
+
+          <Button onClick={() => navigate('achievements')} className="mb-4">View Achievements</Button>
+          <Button variant="secondary" onClick={() => navigate('gallery')}>Back to Gallery</Button>
+        </div>
+      </div>
+    );
+
+    // 15. Gallery
+    const Gallery = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <Header title="Museum Gallery" rightIcon={<span onClick={()=>navigate('settings')} className="cursor-pointer font-bold text-[#212121] text-xl">⚙</span>} />
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
+          <h2 className="font-bold text-[#212121] mb-2 px-2 mt-2">Discovered (3)</h2>
+          
+          {['Guzheng', 'Djembe', 'Shakuhachi'].map((name, i) => (
+             <div key={i} onClick={() => navigate('instrument_detail')} className="flex items-center p-3 bg-white border border-[#e0e0e0] rounded-lg shadow-sm cursor-pointer">
+               <div className="w-16 h-16 bg-[#e0e0e0] rounded mr-4"></div>
+               <div className="flex-1">
+                 <h3 className="font-bold text-[#212121]">{name}</h3>
+                 <p className="text-xs text-[#9e9e9e]">{['String', 'Percussion', 'Wind'][i]}</p>
+               </div>
+               <span className="text-[#9e9e9e] font-bold">&rarr;</span>
+             </div>
+          ))}
+
+          <h2 className="font-bold text-[#212121] mb-2 px-2 mt-8">Locked (Find QR)</h2>
+          {[1,2,3].map(i => (
+             <div key={i} className="flex items-center p-3 bg-[#f5f5f5] border border-[#e0e0e0] rounded-lg opacity-60">
+               <div className="w-16 h-16 bg-[#e0e0e0] rounded mr-4 flex items-center justify-center"><span className="text-[#9e9e9e] font-bold">?</span></div>
+               <div className="flex-1">
+                 <h3 className="font-bold text-[#9e9e9e]">Unknown Instrument</h3>
+                 <p className="text-xs text-[#9e9e9e]">Floor {i}</p>
+               </div>
+             </div>
+          ))}
+        </div>
+        <BottomNav navigate={navigate} current="gallery" />
+      </div>
+    );
+
+    // 16. InstrumentDetail
+    const InstrumentDetail = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <Header title="Guzheng" onBack={() => navigate('gallery')} />
+        <div className="flex-1 overflow-y-auto">
+           <WireframeImage text="High-Res Image" className="w-full h-64" />
+           <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-[#212121]">Guzheng</h2>
+                <span className="px-3 py-1 bg-[#212121] text-white rounded-full text-xs font-bold">Discovered</span>
+              </div>
+              <p className="text-[#757575] mb-6">You discovered this instrument. Revisit the AR experience below.</p>
+              
+              <div className="space-y-4">
+                <Button onClick={() => navigate('model_360')}>View AR Model</Button>
+                <Button variant="secondary" onClick={() => navigate('instrument_info')}>Read Full History</Button>
+              </div>
+           </div>
+        </div>
+      </div>
+    );
+
+    // 17. Profile
+    const Profile = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <Header title="My Profile" />
+        <div className="flex-1 overflow-y-auto p-6 pb-20">
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-24 h-24 bg-[#212121] rounded-full mb-4 flex items-center justify-center text-white text-3xl font-bold">U</div>
+            <h2 className="text-xl font-bold text-[#212121]">User Name</h2>
+            <p className="text-[#9e9e9e]">user@example.com</p>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="bg-[#f5f5f5] p-4 rounded-lg text-center border border-[#e0e0e0]">
+               <div className="text-2xl font-bold text-[#212121]">3</div>
+               <div className="text-xs text-[#757575] font-bold">Instruments</div>
+            </div>
+            <div className="bg-[#f5f5f5] p-4 rounded-lg text-center border border-[#e0e0e0] cursor-pointer" onClick={() => navigate('achievements')}>
+               <div className="text-2xl font-bold text-[#212121]">1</div>
+               <div className="text-xs text-[#757575] font-bold">Badges</div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Button variant="secondary" onClick={() => navigate('achievements')}>Achievements</Button>
+            <Button variant="secondary" onClick={() => navigate('settings')}>Settings</Button>
+            <Button variant="ghost" onClick={() => navigate('landing')}>Log Out</Button>
+          </div>
+        </div>
+        <BottomNav navigate={navigate} current="profile" />
+      </div>
+    );
+
+    // 18. Achievements
+    const Achievements = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <Header title="Achievements" onBack={() => navigate('profile')} />
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+           <div className="flex items-center p-4 border-2 border-[#212121] rounded-lg bg-white">
+              <div className="w-12 h-12 bg-[#212121] rounded-full mr-4 flex items-center justify-center text-white font-bold">1</div>
+              <div>
+                <h3 className="font-bold text-[#212121]">First Note</h3>
+                <p className="text-xs text-[#757575]">Played your first instrument.</p>
+              </div>
+           </div>
+           <div className="flex items-center p-4 border border-[#e0e0e0] rounded-lg bg-[#f9f9f9]">
+              <div className="w-12 h-12 bg-[#e0e0e0] rounded-full mr-4"></div>
+              <div>
+                <h3 className="font-bold text-[#9e9e9e]">String Master</h3>
+                <p className="text-xs text-[#9e9e9e]">Play 5 string instruments.</p>
+              </div>
+           </div>
+           <div className="flex items-center p-4 border border-[#e0e0e0] rounded-lg bg-[#f9f9f9]">
+              <div className="w-12 h-12 bg-[#e0e0e0] rounded-full mr-4"></div>
+              <div>
+                <h3 className="font-bold text-[#9e9e9e]">Percussionist</h3>
+                <p className="text-xs text-[#9e9e9e]">Play 5 drums.</p>
+              </div>
+           </div>
+        </div>
+      </div>
+    );
+
+    // 19. Settings
+    const Settings = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in">
+        <Header title="Settings" onBack={() => navigate('gallery')} />
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+           <div>
+             <h3 className="text-xs font-bold text-[#9e9e9e] mb-4 uppercase tracking-wide">Preferences</h3>
+             <div className="space-y-6">
+                <div className="flex justify-between items-center border-b border-[#e0e0e0] pb-4">
+                   <span className="font-bold text-[#212121]">Haptic Feedback</span>
+                   <div className="w-12 h-6 bg-[#212121] rounded-full relative"><div className="w-4 h-4 bg-white rounded-full absolute right-1 top-1"></div></div>
+                </div>
+                <div className="flex justify-between items-center border-b border-[#e0e0e0] pb-4">
+                   <span className="font-bold text-[#212121]">High Quality Audio</span>
+                   <div className="w-12 h-6 bg-[#e0e0e0] rounded-full relative"><div className="w-4 h-4 bg-white rounded-full absolute left-1 top-1 shadow"></div></div>
+                </div>
+             </div>
+           </div>
+           <div>
+             <h3 className="text-xs font-bold text-[#9e9e9e] mb-4 uppercase tracking-wide">About</h3>
+             <div className="space-y-4">
+                <div className="font-bold text-[#212121] py-2 cursor-pointer">Terms of Service</div>
+                <div className="font-bold text-[#212121] py-2 cursor-pointer">Privacy Policy</div>
+                <div className="font-bold text-[#9e9e9e] py-2 text-sm">App Version 1.0.0</div>
+             </div>
+           </div>
+        </div>
+      </div>
+    );
+
+    // 20. ErrorScreen
+    const ErrorScreen = ({ navigate }) => (
+      <div className="flex flex-col h-full bg-white fade-in items-center justify-center p-6 text-center">
+        <div className="w-24 h-24 bg-[#212121] rounded-full flex items-center justify-center text-white text-4xl font-bold mb-6">!</div>
+        <h2 className="text-2xl font-bold text-[#212121] mb-2">Device Not Supported</h2>
+        <p className="text-[#757575] mb-8">Your device doesn't support the required WebAR features to view this content.</p>
+        <Button onClick={() => navigate('gallery')}>Return to Gallery</Button>
+      </div>
+    );
+
+    const App = () => {
+      const [currentScreen, setCurrentScreen] = useState('landing');
+      
+      const renderScreen = () => {
+        switch(currentScreen) {
+          case 'landing': return <Landing navigate={setCurrentScreen} />;
+          case 'login': return <Login navigate={setCurrentScreen} />;
+          case 'signup': return <SignUp navigate={setCurrentScreen} />;
+          case 'onboarding1': return <Onboarding1 navigate={setCurrentScreen} />;
+          case 'onboarding2': return <Onboarding2 navigate={setCurrentScreen} />;
+          case 'cam_permission': return <CameraPermission navigate={setCurrentScreen} />;
+          case 'scanner': return <Scanner navigate={setCurrentScreen} />;
+          case 'loading_ar': return <LoadingAR navigate={setCurrentScreen} />;
+          case 'model_360': return <Model360View navigate={setCurrentScreen} />;
+          case 'fixed_string': return <FixedViewString navigate={setCurrentScreen} />;
+          case 'fixed_percussion': return <FixedViewPercussion navigate={setCurrentScreen} />;
+          case 'fixed_wind': return <FixedViewWind navigate={setCurrentScreen} />;
+          case 'instrument_info': return <InstrumentInfo navigate={setCurrentScreen} />;
+          case 'audio_feedback': return <AudioFeedback navigate={setCurrentScreen} />;
+          case 'gallery': return <Gallery navigate={setCurrentScreen} />;
+          case 'instrument_detail': return <InstrumentDetail navigate={setCurrentScreen} />;
+          case 'profile': return <Profile navigate={setCurrentScreen} />;
+          case 'achievements': return <Achievements navigate={setCurrentScreen} />;
+          case 'settings': return <Settings navigate={setCurrentScreen} />;
+          case 'error': return <ErrorScreen navigate={setCurrentScreen} />;
+          default: return <Landing navigate={setCurrentScreen} />;
+        }
+      };
+
+      return <div className="h-full w-full">{renderScreen()}</div>;
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
