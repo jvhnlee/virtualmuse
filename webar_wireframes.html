@@ -230,13 +230,15 @@
         <div className="absolute top-4 left-4 z-10">
           <button onClick={() => navigate('model_360')} className="bg-white px-3 py-2 rounded font-bold text-[#212121]">&larr;</button>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-white relative">
-          <WireframeImage text="Fixed Front View: Strings" className="w-full h-[60%] bg-[#424242] border border-[#757575] rounded text-white" />
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-white border-2 border-dashed border-white p-4 rounded-lg bg-black bg-opacity-30">
-              &#8596; Swipe across to strum
-            </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-white gap-4">
+          <div className="text-white border-2 border-dashed border-white p-4 rounded-lg bg-black bg-opacity-30 text-center">
+            &#8596; Swipe across to strum
           </div>
+          <WireframeImage text="Fixed Front View: Strings" className="w-full h-[56%] bg-[#424242] border border-[#757575] rounded text-white" />
+          <button className="bg-white text-[#212121] px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-md">
+            <span aria-hidden="true">&#127911;</span>
+            <span>LISTEN</span>
+          </button>
         </div>
         <div className="p-4 flex justify-between bg-[#121212] items-center">
           <button onClick={() => navigate('fixed_percussion')} className="text-[#9e9e9e] underline text-sm">Switch: Percussion</button>
@@ -251,13 +253,15 @@
         <div className="absolute top-4 left-4 z-10">
           <button onClick={() => navigate('model_360')} className="bg-white px-3 py-2 rounded font-bold text-[#212121]">&larr;</button>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-white relative">
-          <WireframeImage text="Fixed Front View: Drum Heads" className="w-full h-[60%] bg-[#424242] border border-[#757575] rounded-full text-white" />
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-white border-2 border-dashed border-white p-4 rounded-lg bg-black bg-opacity-30">
-              &#10003; Tap/Hit to play
-            </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-white gap-4">
+          <div className="text-white border-2 border-dashed border-white p-4 rounded-lg bg-black bg-opacity-30 text-center">
+            &#10003; Tap/Hit to play
           </div>
+          <WireframeImage text="Fixed Front View: Drum Heads" className="w-full h-[56%] bg-[#424242] border border-[#757575] rounded-full text-white" />
+          <button className="bg-white text-[#212121] px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-md">
+            <span aria-hidden="true">&#127911;</span>
+            <span>LISTEN</span>
+          </button>
         </div>
         <div className="p-4 flex justify-between bg-[#121212] items-center">
           <button onClick={() => navigate('fixed_wind')} className="text-[#9e9e9e] underline text-sm">Switch: Wind</button>
@@ -272,13 +276,15 @@
         <div className="absolute top-4 left-4 z-10">
           <button onClick={() => navigate('model_360')} className="bg-white px-3 py-2 rounded font-bold text-[#212121]">&larr;</button>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-white relative">
-          <WireframeImage text="Fixed Front View: Flute Holes" className="w-24 h-[80%] bg-[#424242] border border-[#757575] rounded-full text-white" />
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-white border-2 border-dashed border-white p-4 rounded-lg bg-black bg-opacity-30 flex flex-col items-center text-center">
-               Hold fingers on holes
-            </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-white gap-4">
+          <div className="text-white border-2 border-dashed border-white p-4 rounded-lg bg-black bg-opacity-30 flex flex-col items-center text-center">
+             Hold fingers on holes
           </div>
+          <WireframeImage text="Fixed Front View: Flute Holes" className="w-24 h-[72%] bg-[#424242] border border-[#757575] rounded-full text-white" />
+          <button className="bg-white text-[#212121] px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-md">
+            <span aria-hidden="true">&#127911;</span>
+            <span>LISTEN</span>
+          </button>
         </div>
         <div className="p-4 flex justify-between bg-[#121212] items-center">
           <button onClick={() => navigate('fixed_string')} className="text-[#9e9e9e] underline text-sm">Switch: String</button>
@@ -320,14 +326,6 @@
           </div>
           <h2 className="text-2xl font-bold text-[#212121] mb-2">Great Performance!</h2>
           <p className="text-[#9e9e9e] mb-8">You've unlocked the Guzheng Master badge.</p>
-          
-          <div className="w-full bg-[#e0e0e0] p-4 rounded-lg mb-8 flex items-center space-x-4">
-             <button className="w-10 h-10 bg-[#212121] text-white rounded-full flex items-center justify-center font-bold">&#9658;</button>
-             <div className="flex-1 h-2 bg-[#9e9e9e] rounded-full relative">
-               <div className="absolute top-0 left-0 h-full w-1/3 bg-[#212121] rounded-full"></div>
-             </div>
-             <span className="text-xs font-bold text-[#212121]">0:15</span>
-          </div>
 
           <Button onClick={() => navigate('achievements')} className="mb-4">View Achievements</Button>
           <Button variant="secondary" onClick={() => navigate('gallery')}>Back to Gallery</Button>
