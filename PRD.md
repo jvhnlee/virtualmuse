@@ -51,8 +51,8 @@ To bridge the gap between physical museum exhibits and interactive education, ma
 1.  **User Profiles:** The system must securely store user account details, preferences (haptics, audio quality), and authentication tokens.
 2.  **Instrument Metadata:** The system must store and retrieve historical data, audio samples, and 3D model paths (GLB/GLTF) for each instrument.
 3.  **Progress Tracking:** The system must maintain a persistent record of each user's discovered instruments and unlocked achievements.
-4.  **Interaction Telemetry:** The system must capture timestamped interaction events (scans, playtime, model rotations) for engagement analysis.
-5.  **ML Training Data:** The system must aggregate anonymized telemetry data to train machine learning models for predicting user engagement and recommending exhibits.
+4.  **Interaction Telemetry:** The system must capture timestamped interaction events (scans, playtime, model rotations) in a client-side buffer and transmit them in periodic batches for engagement analysis.
+5.  **ML Training Data:** The system must aggregate anonymized, batched telemetry data to train machine learning models for predicting user engagement and recommending exhibits.
 
 ---
 
@@ -79,7 +79,7 @@ graph TB
     end
 
     subgraph "Data & ML Pipeline"
-        PS[Cloud Pub/Sub: Telemetry Stream]
+        PS[Cloud Pub/Sub: Batched Telemetry]
         BQ[(BigQuery: Data Warehouse)]
         ML[Vertex AI: Engagement Models]
     end
@@ -92,7 +92,7 @@ graph TB
     CDN <--> Storage
 
     %% Telemetry Flow
-    UI -- Streaming Interaction Data --> PS
+    UI -- Periodic Batch Push --> PS
     PS --> BQ
     BQ --> ML
     ML -- Insights/Recommendations --> CR
@@ -116,7 +116,7 @@ graph TB
 1.  **Frontend/Backend Delivery**: `Cloud Run` serves the React application. The client fetches heavy 3D assets (GLB) and audio samples from `Cloud Storage` via `Cloud CDN` for low-latency delivery.
 2.  **User Management**: `Firebase Authentication` handles secure login, while `Firestore` stores persistent user states like discovered instruments and achievements.
 3.  **Real-time Interaction**: The WebAR engine (8th Wall) interacts with `Cloud Run` APIs to validate QR codes and fetch instrument-specific metadata.
-4.  **Telemetry Pipeline**: User actions (scans, playtime, swipes) are streamed via `Pub/Sub` into `BigQuery`. This avoids blocking the main UI thread.
+4.  **Batched Telemetry Pipeline**: User actions (scans, playtime, swipes) are captured locally and sent in periodic batches via `Pub/Sub` into `BigQuery`. This reduces network egress costs and preserves device battery life.
 5.  **Intelligence Layer**: `Vertex AI` analyzes historical data in `BigQuery` to generate engagement scores and personalized recommendations.
 
 ---
@@ -139,8 +139,9 @@ graph TD
     I --> K[Instrument Info]
     
     J --> L[Audio Playback]
-    L --> M[Telemetry to Pub/Sub]
-    M --> N[BigQuery & Vertex AI]
+    L --> M[Client-side Event Buffer]
+    M -- Batched Upload --> N[Pub/Sub & BigQuery]
+    N --> P[Vertex AI Analysis]
     L --> O[Badge Unlock / DB Update]
     O --> D
 ```
