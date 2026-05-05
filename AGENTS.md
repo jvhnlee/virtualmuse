@@ -69,9 +69,11 @@ Visibility of system status: Keep users informed about what is going on through 
 * Semantic HTML: Use <nav>, <main>, <section>, and <article> tags to ensure SEO and screen-reader compatibility.
 * CSS-in-JS / Modules: Use scoped styling (Tailwind CSS, Styled Components, or CSS Modules) to prevent global namespace pollution.
 * Responsive Design: Use Flexbox and Grid. All layouts must be mobile-first by default.
+* Three.js: Use Three.js for 3D graphics and animations. Keep it manageable and avoid overly complex and abstract implementations and code.
 ## React Best Practices
 * Component Atomicity: Break UI into the smallest possible reusable units (Atoms -> Molecules -> Organisms).
-* Prop Drilling: Avoid deep drilling; utilize Context API or state management libraries for global state.* Performance: Implement React.memo or useCallback only when expensive re-renders are detected.
+* Prop Drilling: Avoid deep drilling; utilize Context API or state management libraries for global state.
+* Performance: Implement React.memo or useCallback only when expensive re-renders are detected.
 # 4. Operational Workflow
 1. Requirement Extraction: Parse the user prompt for "Vibe" (intent) and "Logic" (functionality)
 2. Drafting (Wireframe): Present the structural layout using the design specifications protocol.
