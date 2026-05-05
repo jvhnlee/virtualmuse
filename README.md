@@ -1,40 +1,73 @@
-# The 20 Screens Included:
-* Landing Page: Entry point with branding and navigation.
+# React + TypeScript + Vite
 
-* Login: Standard authentication.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-* Sign Up: Account creation.
+Currently, two official plugins are available:
 
-* Onboarding 1: Instructions on finding museum QR codes.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-* Onboarding 2: Instructions on how to interact with the AR models.
+## React Compiler
 
-* Camera Permission: Requesting access to the user's camera.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-* Scanner: The camera viewfinder to scan the QR code.
+## Expanding the ESLint configuration
 
-* Loading AR: Simulated loading screen while the 3D model is fetched.
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-* Model 360 View: The main AR view showing the 3D model with a 360° swipe indicator and the main "PLAY" button.
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-* Fixed View (String): Interaction screen with "Swipe to strum" instructions.
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-* Fixed View (Percussion): Interaction screen with "Tap/Hit to play" instructions.
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
 
-* Fixed View (Wind): Interaction screen with "Hold fingers on holes" instructions.
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-* Instrument Info: Overlay detailing the history and playing method of the specific instrument.
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-* Audio Feedback: Post-play screen showing the recorded session and newly unlocked badges.
-
-* Gallery: A list of all discovered and yet-to-be-discovered (locked) instruments in the museum.
-
-* Instrument Detail: A deep-dive page accessible from the Gallery.
-
-* Profile: User stats showing instruments discovered and badges earned.
-
-* Achievements: A list of unlocked and locked badges (e.g., "String Master", "First Note").
-
-* Settings: App preferences (haptics, audio quality) and legal links.
-
-* Error/Unsupported: Standard fallback screen for unsupported devices.
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```

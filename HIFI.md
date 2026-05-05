@@ -1,88 +1,86 @@
-# Technical Specifications: VirtualMuse (Hi-Fi Prototype)
+# Technical Specifications: VirtualMuse (UI/UX Prototype)
 
-This document details the architecture, dependencies, and implementation strategy for transitioning the VirtualMuse wireframes into a functional, high-fidelity WebAR prototype.
+> [!IMPORTANT]
+> This document details the implementation of a **standalone High-Fidelity UI/UX Prototype**. This version is strictly focused on user experience and visual fidelity; it does **not** require backend connectivity, database integration, or external API services.
 
-## 1. Core Technology Stack
-The application will be built as a modern Single Page Application (SPA) with a heavy emphasis on 3D rendering and real-time interaction.
+## 1. Prototype Scope
+The goal of this prototype is to demonstrate the user flow and interactions in a realistic "production-like" environment using local data mocks.
+*   **No Backend Required:** All data (user profiles, instrument metadata, achievements) will be managed via local state and JSON mocks.
+*   **Simulated Auth:** A "Login" flow will exist for UX demonstration but will always succeed with mock credentials.
+*   **Local Assets:** 3D models and audio samples will be served directly from the `/public` directory.
 
-*   **Frontend Framework:** `React 18+` with `TypeScript` for type safety and component atomicity.
-*   **Build Tool:** `Vite` for rapid development and optimized production bundling.
-*   **3D Engine:** `Three.js` wrapped in `@react-three/fiber` (R3F) for declarative 3D scene construction.
-*   **AR Implementation:** `@react-three/xr` (WebXR API) for native browser AR capabilities, or `8th Wall` if advanced markerless SLAM is required for broader device support.
-*   **State Management:** `Zustand` for performant, unopinionated global state (handling user progress, active instrument, and UI toggles without deep prop drilling).
-*   **Styling:** `Tailwind CSS` for utility-first styling, ensuring responsive, mobile-first layouts and easy implementation of the glassmorphism design system.
-*   **Animations:** `Framer Motion` for smooth UI transitions, micro-animations, and page routing.
-*   **QR Scanner:** `html5-qrcode` for accessing the device camera and parsing museum codes.
+## 2. Core Technology Stack
+*   **Frontend Framework:** `React 18+` with `TypeScript`.
+*   **Build Tool:** `Vite`.
+*   **3D Engine:** `Three.js` + `@react-three/fiber` (R3F).
+*   **AR Layer:** `@react-three/xr` (for WebXR testing) or a simulated AR background (camera feed only).
+*   **State Management:** `Zustand` (for handling mock user progress and session state).
+*   **Styling:** `Tailwind CSS` (configured for Apple-style glassmorphism, 4px baseline grid).
+*   **Typography:** Helvetica.
+*   **Animations:** `Framer Motion` (fluid, tactile transitions).
 
-## 2. 3D Assets & Media Sourcing
+## 3. Design System & UI Architecture
+*   **Layout Structure (HUD):** Do NOT use centered hero sections. Implement a Heads-Up Display (HUD) layout with controls anchored to the corners or a thin bottom-docked bar.
+*   **Glassmorphism Specs:** High-quality frosted glass using `backdrop-filter: blur(12px)`.
+*   **Image Assets:** All 2D illustrations and assets must be auto-resized/cropped using CSS `object-fit: cover` to ensure they perfectly fill their designated containers without distortion.
+*   **Bottom Dock:** A floating, pill-shaped navigation bar featuring micro-shadows (`box-shadow: 0 8px 32px rgba(0,0,0,0.3)`).
+*   **Scanning State:** A minimal, geometric "mesh" overlay (replacing legacy spinning circles).
+*   **Feedback Cues:** Haptic-inspired visual cues, such as subtle ring expansions when items are interacted with or placed in 3D space.
 
-### 2.1 3D Models
-*   **Format:** All models must be in `.glb` or `.gltf` format with embedded PBR (Physically Based Rendering) textures.
-*   **Optimization:** Models should be aggressively decimated (low poly count) to ensure fast loading (<3 seconds) and high framerates on mobile devices. Use tools like Blender or Draco compression.
-*   **Sourcing Strategy:**
-    1.  *Primary:* Custom-modeled assets tailored to the specific museum exhibits.
-    2.  *Secondary:* High-quality, royalty-free assets from platforms like Sketchfab (e.g., searching for CC-licensed cultural instruments).
-*   **Structure:** Models must have named meshes for interactive components (e.g., `Mesh_String_E`, `Mesh_DrumHead`) to allow precise raycasting and interaction detection in R3F.
+## 4. Iconography & UI Assets
+To reduce asset friction, the prototype will use **Lucide React** for all 2D iconography.
+*   **Icon Style:** Thin (1px) stroke weight, strictly no filled icons.
+*   **Dynamic Rendering:** Icons are stored as strings in `achievements.json` (e.g., "Trophy", "Drum").
+*   **Implementation:** A dedicated `LucideIcon` component will dynamically resolve these strings.
 
-### 2.2 Audio Assets
-*   **Format:** highly compressed `.mp3` or `.ogg` files.
-*   **Implementation:** Use the Web Audio API (or `Howler.js` for easier management) to ensure zero-delay playback upon gesture interaction.
-*   **Sourcing:** Royalty-free sample libraries (e.g., Splice, Freesound) or custom field recordings of the physical instruments.
+## 4. Mock Data Structure
+Instead of a database, we will use a `src/mocks/` directory to store static data:
+*   `instruments.json`: Metadata for all instruments (name, description, 3D model path, audio path).
+*   `achievements.json`: List of badges and criteria.
+*   `userState.ts`: A Zustand store initialized with a mock "New User" or "Returning User" profile.
 
-## 3. Codebase Structure
-
+## 4. Codebase Structure (Prototype Focused)
 ```text
 virtualmuse/
-├── public/                 # Static assets (favicon, manifest)
-│   ├── models/             # .glb/.gltf instrument models
-│   ├── audio/              # .mp3 instrument samples
-│   └── icons/              # UI icons
+├── public/                 # Static assets
+│   ├── models/             # Optimized .glb instrument models
+│   ├── audio/              # Instrument sound samples
+│   └── textures/           # Environmental maps (HDR)
 ├── src/
-│   ├── assets/             # Images, global CSS
-│   ├── components/         # Reusable UI components (Atoms/Molecules)
-│   │   ├── ui/             # Buttons, Cards, GlassPanels
-│   │   ├── 3d/             # R3F components (InstrumentViewer, Lights, Environment)
-│   │   └── ar/             # WebXR setup and QR Scanner components
-│   ├── hooks/              # Custom React hooks (e.g., useAudio, useScanner)
-│   ├── pages/              # Top-level route components (Organisms/Templates)
-│   │   ├── Home.tsx
-│   │   ├── Gallery.tsx
-│   │   ├── ScannerView.tsx
-│   │   └── ArExperience.tsx
-│   ├── store/              # Zustand state stores
-│   │   └── useAppStore.ts  # Global state (user progress, active item)
-│   ├── types/              # TypeScript interfaces and types
-│   ├── utils/              # Helper functions (constants, math for 3D)
-│   ├── App.tsx             # Main application router
-│   └── main.tsx            # React entry point
-├── index.html
-├── tailwind.config.js      # Custom theme setup (purple spectrum, glass utilities)
-├── tsconfig.json
-└── package.json
+│   ├── components/         
+│   │   ├── ui/             # Apple-style Glass components
+│   │   ├── 3d/             # R3F Instrument renderers
+│   │   └── ar/             # QR simulator & Camera view
+│   ├── mocks/              # Static data files
+│   ├── store/              # Zustand stores (Local only)
+│   ├── pages/              # Prototype screens (Home, Gallery, AR)
+│   ├── App.tsx             
+│   └── main.tsx            
 ```
 
-## 4. Implementation Plan (Phased Approach)
+## 5. Implementation Roadmap (UI/UX Focus)
 
-### Phase 1: Foundation & UI Shell
-1.  Initialize Vite + React + TypeScript project.
-2.  Configure Tailwind CSS with the custom purple spectrum and glassmorphism utility classes.
-3.  Build the non-AR screens (Home, Login/Onboarding, Gallery Dashboard) using placeholder data.
-4.  Implement routing and Framer Motion page transitions.
+### Phase 1: Visual Foundation
+*   Setup Vite project with Tailwind and Framer Motion.
+*   Implement the "Glassmorphism" material library (utility classes).
+*   Build the Home and Login screens (UI only).
 
-### Phase 2: Core Functionality (Scanner & Data)
-1.  Integrate `html5-qrcode` to build the scanning interface.
-2.  Set up the `Zustand` store to manage unlocked instruments based on simulated scan results.
-3.  Implement basic hardware capability checks (camera permissions).
+### Phase 2: Interactive Gallery
+*   Build the Instrument Gallery using `instruments.json`.
+*   Implement smooth transitions between the Gallery and Detail views.
+*   Setup the achievement notification UI.
 
-### Phase 3: The 3D/AR Experience
-1.  Setup `@react-three/fiber` canvas in the `ArExperience` page.
-2.  Load a sample `.glb` instrument model.
-3.  Implement basic 3D controls (OrbitControls for 360° viewing).
-4.  Integrate `@react-three/xr` for the AR overlay (or configure the camera feed as the canvas background if using a custom approach).
-5.  Implement Raycasting on specific model meshes to trigger console logs (proof of interaction).
+### Phase 3: AR Simulation & 3D
+*   Integrate R3F and load the first instrument model.
+*   Enable 360° rotation and basic zoom interactions.
+*   Implement non-interactive 3D previews in the Detail gallery views.
 
-### Phase 4: Polish & Audio
-1.  Map raycast interactions to the Web Audio API for sound playback.
-2.  Add visual feedback to interactions (e.g., glowing strings, haptic feedback).
-3.  Conduct performance profiling (target: stable 60fps on mid-range mobile devices).
-4.  Final accessibility and responsive design audits.
+### Phase 4: Audio & Interaction Polish
+*   Link gesture hits (raycasting) to mock audio playback.
+*   Implement instrument-specific gestures (Tap, Hold, Swipe).
+*   Finalize micro-interactions (vibrancy, haptics, transitions).
+
+### Phase 5: Scanner & Real Camera Functionality
+*   Implement a simulated AR background using a live camera feed.
+*   Connect the Scanner UI pipeline to automatically unlock and launch AR views.
+*   Verify responsiveness across mobile screen sizes with active hardware access.

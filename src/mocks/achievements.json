@@ -1,0 +1,61 @@
+[
+  {
+    "id": "first-discovery",
+    "title": "First Discovery",
+    "description": "Unlock your very first traditional instrument.",
+    "iconName": "Trophy",
+    "unlocked": true
+  },
+  {
+    "id": "rhythm-master",
+    "title": "Rhythm Master",
+    "description": "Master the basic beat of the Kompang.",
+    "iconName": "Drum",
+    "instrumentId": "kompang",
+    "unlocked": true
+  },
+  {
+    "id": "wind-whisperer",
+    "title": "Wind Whisperer",
+    "description": "Maintain a sustained note on the Serunai.",
+    "iconName": "Wind",
+    "instrumentId": "serunai",
+    "unlocked": true
+  },
+  {
+    "id": "string-virtuoso",
+    "title": "String Virtuoso",
+    "description": "Strum the soulful strings of the Sape.",
+    "iconName": "Music",
+    "instrumentId": "sape",
+    "unlocked": true
+  },
+  {
+    "id": "curators-collection",
+    "title": "Curator's Collection",
+    "description": "Discover all instruments in the primary exhibit.",
+    "iconName": "Library",
+    "unlocked": false
+  },
+  {
+    "id": "perfect-harmony",
+    "title": "Perfect Harmony",
+    "description": "Play all 3 core instruments flawlessly in AR mode.",
+    "iconName": "Star",
+    "unlocked": false
+  },
+  {
+    "id": "cultural-historian",
+    "title": "Cultural Historian",
+    "description": "Read the full history of every discovered instrument.",
+    "iconName": "BookOpen",
+    "unlocked": false
+  },
+  {
+    "id": "ar-pioneer",
+    "title": "AR Pioneer",
+    "description": "Spend over 10 minutes interacting in the AR environment.",
+    "iconName": "Globe",
+    "unlocked": false
+  }
+]

@@ -1,0 +1,70 @@
+[
+  {
+    "id": "kompang",
+    "name": "Kompang",
+    "category": "Percussion",
+    "origin": "Malay Peninsula",
+    "description": "The Kompang is the most popular traditional drum in Malaysia, widely used in social gatherings like weddings and national ceremonies.",
+    "history": "Believed to have Arabic origins, it was brought to the Malay Archipelago by traders during the Malacca Sultanate. It is a frame drum made of a circular wooden frame and a goat-hide head.",
+    "interactionType": "tap",
+    "gestures": ["Single Tap: Basic Beat"],
+    "modelPath": "/models/kompang.glb",
+    "audioPath": "/audio/kompang-sample.wav",
+    "illustration": "/images/illustrations/kompang-illustration.jpg",
+    "difficulty": "Easy"
+  },
+  {
+    "id": "serunai",
+    "name": "Serunai",
+    "category": "Wind",
+    "origin": "Kelantan",
+    "description": "The Serunai is a double-reed woodwind instrument known for its high-pitched, nasal tone, often leading the melody in Wayang Kulit performances.",
+    "history": "Related to the North Indian 'shehnai', it features a wooden body and a flared bell. It requires 'circular breathing' techniques to play continuous haunting melodies.",
+    "interactionType": "blow",
+    "gestures": ["Hold: Sustained Note"],
+    "modelPath": "/models/serunai.glb",
+    "audioPath": "/audio/serunai-sample.wav",
+    "illustration": "/images/illustrations/serunai-illustration.jpg",
+    "difficulty": "Hard"
+  },
+  {
+    "id": "sape",
+    "name": "Sape",
+    "category": "String",
+    "origin": "Sarawak (Borneo)",
+    "description": "Often called the 'Boat Lute', the Sape is a traditional lute of the Orang Ulu community, known for its soothing, dream-like sounds.",
+    "history": "Traditionally carved from a single block of adau wood, it was originally used by shamans in healing rituals. Modern Sapes now feature 3 to 5 strings and are used for social dances.",
+    "interactionType": "pluck",
+    "gestures": ["Swipe: Strum All Strings"],
+    "modelPath": "/models/sape.glb",
+    "audioPath": "/audio/sape-sample.wav",
+    "illustration": "/images/illustrations/sape-illustration.jpg",
+    "difficulty": "Medium"
+  },
+  {
+    "id": "locked-1",
+    "name": "Unknown Instrument",
+    "category": "Mystery",
+    "origin": "Unknown",
+    "description": "Keep exploring to unlock this instrument.",
+    "history": "",
+    "interactionType": "",
+    "gestures": [],
+    "modelPath": "",
+    "audioPath": "",
+    "difficulty": ""
+  },
+  {
+    "id": "locked-2",
+    "name": "Unknown Instrument",
+    "category": "Mystery",
+    "origin": "Unknown",
+    "description": "Keep exploring to unlock this instrument.",
+    "history": "",
+    "interactionType": "",
+    "gestures": [],
+    "modelPath": "",
+    "audioPath": "",
+    "difficulty": ""
+  }
+]
