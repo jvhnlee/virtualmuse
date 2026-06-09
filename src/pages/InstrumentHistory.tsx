@@ -34,7 +34,7 @@ export default function InstrumentHistory() {
             <img 
               src={instrument.illustration} 
               alt={instrument.name} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-fill"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-white/30 italic text-sm">

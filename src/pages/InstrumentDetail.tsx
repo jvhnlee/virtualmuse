@@ -46,12 +46,19 @@ export default function InstrumentDetail() {
         {/* Live 3D Preview */}
         <div className="w-full h-64 bg-black/40 relative shadow-lg pointer-events-none">
           <div className="absolute inset-0 z-0">
-            <Canvas shadows camera={{ position: [0, 0, 4], fov: 45 }}>
-              <Suspense fallback={null}>
-                <Environment preset="studio" />
-                <InstrumentModel modelPath={`/models/${instrument.id}.glb`} />
-              </Suspense>
-            </Canvas>
+            {(() => {
+              let camPos: [number, number, number] = [0, 0, 4];
+              if (instrument.id === 'sape') camPos = [4, 0, 0];
+              
+              return (
+                <Canvas shadows dpr={[1, 1.5]} frameloop="demand" camera={{ position: camPos, fov: 45 }}>
+                  <Suspense fallback={null}>
+                    <Environment preset="studio" resolution={256} />
+                    <InstrumentModel modelPath={`/models/${instrument.id}.glb`} />
+                  </Suspense>
+                </Canvas>
+              );
+            })()}
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent z-10" />
         </div>
@@ -59,18 +66,18 @@ export default function InstrumentDetail() {
         <div className="p-6 -mt-6 relative z-20">
           <div className="glass-regular p-6 rounded-3xl mb-6">
             <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-1">{instrument.name}</h2>
-                <div className="flex space-x-2">
-                  <span className="px-3 py-1 glass-thick text-vm-purple-500 rounded-full text-xs font-bold shadow-sm">
+              <div className="flex-1 pr-4">
+                <h2 className="text-2xl font-bold text-white mb-2">{instrument.name}</h2>
+                <div className="flex flex-wrap gap-2">
+                  <span className="px-3 py-1.5 glass-thick text-vm-purple-500 rounded-full text-xs font-bold shadow-sm whitespace-nowrap flex items-center">
                     {instrument.category}
                   </span>
-                  <span className="px-3 py-1 glass-thin text-white/80 rounded-full text-xs font-bold">
+                  <span className="px-3 py-1.5 glass-thin text-white/80 rounded-full text-xs font-bold shadow-sm whitespace-nowrap flex items-center">
                     {instrument.origin}
                   </span>
                 </div>
               </div>
-              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-full text-xs font-bold animate-pulse">
+              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-full text-xs font-bold whitespace-nowrap animate-pulse shrink-0">
                 Discovered
               </span>
             </div>

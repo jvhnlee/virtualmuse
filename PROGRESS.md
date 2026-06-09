@@ -49,7 +49,18 @@ This document logs the development progress of the VirtualMuse High-Fidelity UI/
 - [x] **Haptics:** Built a visual geometric ring-expansion at the point of interaction.
 
 ## Current Status
-**In Progress: Phase 5: Scanner & Real Camera Functionality.** (Implementing live webcam feeds and scan-to-AR routing).
+**In Progress: Final Polish & Deployment.**
 
-## Upcoming Phases (from `HIFI.md`)
-- **Phase 5:** Scanner & Real Camera Functionality (Live webcam feed, scan-to-AR pipeline).
+### 7. Phase 5: Scanner & Real Camera Functionality (Complete)
+- [x] **HTML5-QRCode Integration:** Replaced static scanning UI with a live webcam feed parser.
+- [x] **Fallback States:** Added robust error handling and UI for denied permissions or unavailable hardware.
+- [x] **Dev Bypass HUD:** Included a top-bar "Fast Forward" button for bypassing the camera requirement during desktop testing.
+- [x] **Permission Fixes:** Explicitly call `Html5Qrcode.getCameras()` to force OS-level hardware permission prompts consistently.
+
+### 8. Mobile Browser Optimization (Complete)
+- [x] **Viewport Lockdown:** Added `viewport-fit=cover` and locked `html, body` positioning to fix native rubber-band scrolling and URL bar resizing issues on iOS/Android.
+- [x] **Memory Management:** Migrated 3D model duplication from `scene.clone()` to `@react-three/drei`'s `<Clone />` component, sharing geometry arrays across the app to reduce RAM usage.
+- [x] **GPU Restraints:** Clamped all `<Canvas>` contexts to `dpr={[1, 1.5]}` and reduced HDR Environment map resolution to `256` to ensure 60fps on high-DPI mobile screens without overheating.
+- [x] **Battery Saver:** Switched the gallery's 3D preview to `frameloop="demand"` so the renderer sleeps while the static asset is viewed.
+- [x] **Scanner Threading:** Dropped the QR analysis frequency to `fps: 5` to unblock the main JS thread on slower mobile CPUs.
+- [x] **Audio State Management:** Forced audio elements to pause instantly upon exiting AR Play Mode or component unmounting.

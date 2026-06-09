@@ -34,7 +34,7 @@ export default function Login() {
     >
       <div className="absolute top-1/4 right-[-20%] w-80 h-80 bg-vm-purple-500/20 rounded-full blur-[100px]" />
 
-      <header className="w-full flex items-center mb-12 z-10 px-6 pt-6">
+      <header className="w-full flex items-center mb-12 z-10">
         <button 
           onClick={() => navigate(-1)}
           className="p-2 glass-thin rounded-full hover:bg-white/10 transition-colors"

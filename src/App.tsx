@@ -35,8 +35,10 @@ function AnimatedRoutes() {
 function App() {
   return (
     <Router>
-      <div className="w-full h-screen overflow-hidden font-sans">
-        <AnimatedRoutes />
+      <div className="flex justify-center items-center h-full w-full bg-slate-950 font-sans">
+        <div className="w-full h-full sm:h-[844px] sm:max-h-[95vh] sm:max-w-[390px] sm:rounded-[40px] sm:border-[8px] border-slate-800 shadow-2xl overflow-hidden relative" style={{ backgroundImage: 'radial-gradient(circle at top right, #1e1b4b, #0f172a)' }}>
+          <AnimatedRoutes />
+        </div>
       </div>
     </Router>
   );

@@ -45,6 +45,8 @@ export default function ARViewer() {
   
   const [isPlayMode, setIsPlayMode] = useState(false);
   const [visualHits, setVisualHits] = useState<{id: number, x: number, y: number}[]>([]);
+  const [strokes, setStrokes] = useState<{id: number, points: {x: number, y: number}[]}[]>([]);
+  const [currentStrokeId, setCurrentStrokeId] = useState<number | null>(null);
   
   const instrument = instruments.find(inst => inst.id === id);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -53,6 +55,11 @@ export default function ARViewer() {
     if (instrument) {
       audioRef.current = new Audio(instrument.audioPath);
     }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
   }, [instrument]);
 
   if (!instrument) {
@@ -81,13 +88,39 @@ export default function ARViewer() {
       setVisualHits(prev => prev.filter(hit => hit.id !== newHit.id));
     }, 800);
 
+    // Start stroke
+    setCurrentStrokeId(newHit.id);
+    setStrokes(prev => [...prev, { id: newHit.id, points: [{ x: e.clientX, y: e.clientY }] }]);
+
     // Play Audio logic
     audioRef.current.currentTime = 0;
     audioRef.current.play();
   };
 
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isPlayMode || currentStrokeId === null) return;
+    
+    // Append to current stroke
+    setStrokes(prev => prev.map(s => {
+      if (s.id === currentStrokeId) {
+        return { ...s, points: [...s.points, { x: e.clientX, y: e.clientY }] };
+      }
+      return s;
+    }));
+  };
+
   const handlePointerUp = () => {
     if (!isPlayMode || !audioRef.current) return;
+    
+    // Finish stroke
+    if (currentStrokeId !== null) {
+      const idToRemove = currentStrokeId;
+      setCurrentStrokeId(null);
+      setTimeout(() => {
+        setStrokes(prev => prev.filter(s => s.id !== idToRemove));
+      }, 600); // fade out duration
+    }
+
     // For hold-to-blow instruments, we might want to pause on release
     if (instrument.id === 'serunai') {
       audioRef.current.pause();
@@ -103,13 +136,13 @@ export default function ARViewer() {
     >
       {/* 3D Canvas */}
       <div className="absolute inset-0 z-0">
-        <Canvas shadows camera={{ position: [0, 0, 5], fov: 50 }}>
+        <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 0, 5], fov: 50 }}>
           <color attach="background" args={['#0f172a']} />
           
           <Suspense fallback={<Loader />}>
-            <Environment preset="studio" />
+            <Environment preset="studio" resolution={256} />
             <InstrumentModel modelPath={modelPath} />
-            <ContactShadows position={[0, -1.5, 0]} opacity={0.4} scale={10} blur={2} far={4} />
+            <ContactShadows position={[0, -1.5, 0]} opacity={0.4} scale={10} blur={2} far={4} resolution={256} frames={1} />
           </Suspense>
 
           <CameraRig isPlayMode={isPlayMode} instrumentId={instrument.id} />
@@ -133,10 +166,34 @@ export default function ARViewer() {
         <div 
           className="absolute inset-0 z-10 cursor-crosshair touch-none"
           onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
         />
       )}
+
+      {/* Gesture Strokes */}
+      <svg className="absolute inset-0 z-0 pointer-events-none w-full h-full">
+        {strokes.map(stroke => {
+          if (stroke.points.length < 2) return null;
+          const d = `M ${stroke.points.map(p => `${p.x},${p.y}`).join(' L ')}`;
+          return (
+            <motion.path 
+              key={stroke.id}
+              d={d}
+              fill="none"
+              stroke="#8B5CF6"
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ opacity: 1 }}
+              animate={currentStrokeId === stroke.id ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              style={{ filter: 'drop-shadow(0 0 8px rgba(139,92,246,0.8))' }}
+            />
+          );
+        })}
+      </svg>
 
       {/* Visual Haptic Rings */}
       {visualHits.map(hit => (
@@ -164,7 +221,13 @@ export default function ARViewer() {
             </button>
           ) : (
             <button 
-              onClick={() => setIsPlayMode(false)}
+              onClick={() => {
+                setIsPlayMode(false);
+                if (audioRef.current) {
+                  audioRef.current.pause();
+                  audioRef.current.currentTime = 0;
+                }
+              }}
               className="px-4 py-2 glass-thick rounded-full text-white hover:bg-white/10 transition-colors shadow-sm flex items-center gap-2"
             >
               <ChevronLeft strokeWidth={1} className="w-5 h-5" />
