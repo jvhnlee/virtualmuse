@@ -3,7 +3,7 @@ import { OrbitControls, Environment, ContactShadows, Html, useProgress } from '@
 import { Suspense, useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
-import { X, Info, Play, ChevronLeft } from 'lucide-react';
+import { X, Info, Play, ChevronLeft, Headphones, Pause } from 'lucide-react';
 import * as THREE from 'three';
 import { useAppStore } from '../store/useAppStore';
 import InstrumentModel from '../components/3d/InstrumentModel';
@@ -47,20 +47,74 @@ export default function ARViewer() {
   const [visualHits, setVisualHits] = useState<{id: number, x: number, y: number}[]>([]);
   const [strokes, setStrokes] = useState<{id: number, points: {x: number, y: number}[]}[]>([]);
   const [currentStrokeId, setCurrentStrokeId] = useState<number | null>(null);
+  const [isPlayingFull, setIsPlayingFull] = useState(false);
   
   const instrument = instruments.find(inst => inst.id === id);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const interactionAudiosRef = useRef<HTMLAudioElement[]>([]);
+  const kompangHitIndexRef = useRef(0);
 
   useEffect(() => {
+    const handleEnded = () => setIsPlayingFull(false);
     if (instrument) {
       audioRef.current = new Audio(instrument.audioPath);
+      audioRef.current.addEventListener('ended', handleEnded);
+
+      if (instrument.id === 'kompang') {
+        interactionAudiosRef.current = [
+          new Audio('/audio/kompang-single-hit-1.wav'),
+          new Audio('/audio/kompang-single-hit-2.wav')
+        ];
+      } else if (instrument.id === 'sape') {
+        interactionAudiosRef.current = [
+          new Audio('/audio/sape-single-strum.wav')
+        ];
+      } else if (instrument.id === 'serunai') {
+        interactionAudiosRef.current = [
+          new Audio('/audio/serunai-single-blow.wav')
+        ];
+      } else {
+        interactionAudiosRef.current = [];
+      }
     }
     return () => {
       if (audioRef.current) {
+        audioRef.current.removeEventListener('ended', handleEnded);
         audioRef.current.pause();
       }
+      interactionAudiosRef.current.forEach(audio => audio.pause());
     };
   }, [instrument]);
+
+  const playInteractionAudio = () => {
+    setIsPlayingFull(false);
+    if (audioRef.current) audioRef.current.pause();
+    
+    if (instrument?.id === 'kompang') {
+      const idx = kompangHitIndexRef.current;
+      const audio = interactionAudiosRef.current[idx];
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play();
+      }
+      kompangHitIndexRef.current = (idx + 1) % 2;
+    } else if (instrument?.id === 'sape' || instrument?.id === 'serunai') {
+      const audio = interactionAudiosRef.current[0];
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play();
+      }
+    }
+  };
+
+  const stopInteractionAudio = () => {
+    if (instrument?.id === 'serunai') {
+      const audio = interactionAudiosRef.current[0];
+      if (audio) {
+        audio.pause();
+      }
+    }
+  };
 
   if (!instrument) {
     return (
@@ -95,13 +149,8 @@ export default function ARViewer() {
     setStrokes(prev => [...prev, { id: newHit.id, points: [{ x: e.clientX, y: e.clientY }] }]);
 
     // Play Audio logic (for hit and hold)
-    if (instrument.id === 'kompang' || instrument.id === 'serunai') {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
-    } else if (instrument.id === 'sape') {
-      // Sape plays on move/strum, but we can play a small sound on tap too
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
+    if (instrument.id === 'kompang' || instrument.id === 'serunai' || instrument.id === 'sape') {
+      playInteractionAudio();
     }
   };
 
@@ -123,9 +172,13 @@ export default function ARViewer() {
         
         // If moved fast enough, trigger a strum
         if (velocity > 30) {
-          if (audioRef.current.paused || audioRef.current.currentTime > 0.5) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play();
+          const audio = interactionAudiosRef.current[0];
+          if (audio && (audio.paused || audio.currentTime > 0.5)) {
+            setIsPlayingFull(false);
+            if (audioRef.current) audioRef.current.pause();
+
+            audio.currentTime = 0;
+            audio.play();
             
             // Visual feedback for mouse strum
             if (currentStrokeId === null) {
@@ -168,18 +221,20 @@ export default function ARViewer() {
     }
 
     // For hold-to-blow instruments, pause on release
-    if (instrument.id === 'serunai') {
-      audioRef.current.pause();
-    }
+    stopInteractionAudio();
   };
 
   const handleWheel = (e: React.WheelEvent) => {
     if (!isPlayMode || !audioRef.current) return;
     // Trackpad swipe triggers wheel events
     if (instrument.id === 'sape' && Math.abs(e.deltaY) > 10) {
-      if (audioRef.current.paused || audioRef.current.currentTime > 0.5) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play();
+      const audio = interactionAudiosRef.current[0];
+      if (audio && (audio.paused || audio.currentTime > 0.5)) {
+        setIsPlayingFull(false);
+        if (audioRef.current) audioRef.current.pause();
+
+        audio.currentTime = 0;
+        audio.play();
       }
     }
   };
@@ -191,14 +246,13 @@ export default function ARViewer() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' && !e.repeat) {
         e.preventDefault(); // Prevent scrolling
-        audioRef.current!.currentTime = 0;
-        audioRef.current!.play();
+        playInteractionAudio();
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.code === 'Space' && instrument.id === 'serunai') {
-        audioRef.current!.pause();
+        stopInteractionAudio();
       }
     };
 
@@ -307,6 +361,7 @@ export default function ARViewer() {
             <button 
               onClick={() => {
                 setIsPlayMode(false);
+                setIsPlayingFull(false);
                 if (audioRef.current) {
                   audioRef.current.pause();
                   audioRef.current.currentTime = 0;
@@ -325,6 +380,36 @@ export default function ARViewer() {
               className="p-3 glass-thin rounded-full text-white hover:bg-white/10 transition-colors shadow-sm"
             >
               <Info strokeWidth={1} className="w-6 h-6" />
+            </button>
+          )}
+
+          {isPlayMode && (
+            <button 
+              onClick={() => {
+                if (audioRef.current) {
+                  if (isPlayingFull) {
+                    audioRef.current.pause();
+                    setIsPlayingFull(false);
+                  } else {
+                    audioRef.current.currentTime = 0;
+                    audioRef.current.play();
+                    setIsPlayingFull(true);
+                  }
+                }
+              }}
+              className="px-4 py-2 glass-thick rounded-full text-white hover:bg-white/10 transition-colors shadow-sm flex items-center gap-2"
+            >
+              {isPlayingFull ? (
+                <>
+                  <Pause strokeWidth={1} className="w-5 h-5" />
+                  <span className="text-sm font-bold tracking-widest uppercase">Stop</span>
+                </>
+              ) : (
+                <>
+                  <Headphones strokeWidth={1} className="w-5 h-5" />
+                  <span className="text-sm font-bold tracking-widest uppercase">Listen</span>
+                </>
+              )}
             </button>
           )}
         </header>
