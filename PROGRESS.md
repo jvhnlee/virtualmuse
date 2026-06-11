@@ -64,3 +64,9 @@ This document logs the development progress of the VirtualMuse High-Fidelity UI/
 - [x] **Battery Saver:** Switched the gallery's 3D preview to `frameloop="demand"` so the renderer sleeps while the static asset is viewed.
 - [x] **Scanner Threading:** Dropped the QR analysis frequency to `fps: 5` to unblock the main JS thread on slower mobile CPUs.
 - [x] **Audio State Management:** Forced audio elements to pause instantly upon exiting AR Play Mode or component unmounting.
+
+### 9. Phase 6: Desktop Polish & UI Consistency (Complete)
+- [x] **Desktop AR Gestures:** Added velocity-based mouse movement detection for strumming without clicking, `onWheel` tracking for two-finger trackpad swipes, and Spacebar listeners to handle "hold-to-blow" mechanics reliably on non-touch devices.
+- [x] **Pointer Drag Resilience:** Upgraded `handlePointerDown` to use `setPointerCapture` to ensure rapid dragging doesn't break if the cursor accidentally leaves the interaction zone.
+- [x] **Gallery Thumbnails:** Replaced static image placeholders in the Gallery list with dynamic, category-specific `lucide-react` icons (Circle, Wind, Music) for a cleaner UI.
+- [x] **Profile Routing Continuity:** Matched the "Instruments" stats box interaction parity with the "Badges" box, adding hover states and a direct route to the Gallery.

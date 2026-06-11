@@ -81,6 +81,8 @@ export default function ARViewer() {
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!isPlayMode || !audioRef.current) return;
     
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+
     // Add visual haptic ring
     const newHit = { id: Date.now(), x: e.clientX, y: e.clientY };
     setVisualHits(prev => [...prev, newHit]);
@@ -92,26 +94,70 @@ export default function ARViewer() {
     setCurrentStrokeId(newHit.id);
     setStrokes(prev => [...prev, { id: newHit.id, points: [{ x: e.clientX, y: e.clientY }] }]);
 
-    // Play Audio logic
-    audioRef.current.currentTime = 0;
-    audioRef.current.play();
+    // Play Audio logic (for hit and hold)
+    if (instrument.id === 'kompang' || instrument.id === 'serunai') {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    } else if (instrument.id === 'sape') {
+      // Sape plays on move/strum, but we can play a small sound on tap too
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    }
   };
+
+  const lastMoveTime = useRef<number>(0);
+  const lastMousePos = useRef<{x: number, y: number} | null>(null);
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isPlayMode || currentStrokeId === null) return;
-    
-    // Append to current stroke
-    setStrokes(prev => prev.map(s => {
-      if (s.id === currentStrokeId) {
-        return { ...s, points: [...s.points, { x: e.clientX, y: e.clientY }] };
+    if (!isPlayMode || !audioRef.current) return;
+
+    const now = Date.now();
+    const pos = { x: e.clientX, y: e.clientY };
+
+    // Sape strumming via mouse movement (even without clicking)
+    if (instrument.id === 'sape') {
+      if (lastMousePos.current && now - lastMoveTime.current > 50) {
+        const dx = pos.x - lastMousePos.current.x;
+        const dy = pos.y - lastMousePos.current.y;
+        const velocity = Math.sqrt(dx * dx + dy * dy);
+        
+        // If moved fast enough, trigger a strum
+        if (velocity > 30) {
+          if (audioRef.current.paused || audioRef.current.currentTime > 0.5) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play();
+            
+            // Visual feedback for mouse strum
+            if (currentStrokeId === null) {
+              const newHit = { id: Date.now(), x: pos.x, y: pos.y };
+              setVisualHits(prev => [...prev, newHit]);
+              setTimeout(() => {
+                setVisualHits(prev => prev.filter(hit => hit.id !== newHit.id));
+              }, 800);
+            }
+          }
+        }
       }
-      return s;
-    }));
+      lastMousePos.current = pos;
+      lastMoveTime.current = now;
+    }
+    
+    // Append to current stroke if dragging
+    if (currentStrokeId !== null) {
+      setStrokes(prev => prev.map(s => {
+        if (s.id === currentStrokeId) {
+          return { ...s, points: [...s.points, pos] };
+        }
+        return s;
+      }));
+    }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent) => {
     if (!isPlayMode || !audioRef.current) return;
     
+    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+
     // Finish stroke
     if (currentStrokeId !== null) {
       const idToRemove = currentStrokeId;
@@ -121,11 +167,48 @@ export default function ARViewer() {
       }, 600); // fade out duration
     }
 
-    // For hold-to-blow instruments, we might want to pause on release
+    // For hold-to-blow instruments, pause on release
     if (instrument.id === 'serunai') {
       audioRef.current.pause();
     }
   };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (!isPlayMode || !audioRef.current) return;
+    // Trackpad swipe triggers wheel events
+    if (instrument.id === 'sape' && Math.abs(e.deltaY) > 10) {
+      if (audioRef.current.paused || audioRef.current.currentTime > 0.5) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play();
+      }
+    }
+  };
+
+  // Keyboard support for Hold (Serunai) and Hit (Kompang)
+  useEffect(() => {
+    if (!isPlayMode || !audioRef.current) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat) {
+        e.preventDefault(); // Prevent scrolling
+        audioRef.current!.currentTime = 0;
+        audioRef.current!.play();
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && instrument.id === 'serunai') {
+        audioRef.current!.pause();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [isPlayMode, instrument.id]);
 
   return (
     <motion.div 
@@ -169,6 +252,7 @@ export default function ARViewer() {
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
+          onWheel={handleWheel}
         />
       )}
 

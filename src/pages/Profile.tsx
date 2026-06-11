@@ -36,7 +36,10 @@ export default function Profile() {
         </div>
         
         <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="glass-regular p-5 rounded-2xl text-center">
+          <div 
+            onClick={() => navigate('/gallery')}
+            className="glass-regular p-5 rounded-2xl text-center cursor-pointer hover:bg-white/10 transition-colors"
+          >
              <div className="text-3xl font-bold text-vm-purple-500">{discoveredInstrumentIds.length}</div>
              <div className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Instruments</div>
           </div>

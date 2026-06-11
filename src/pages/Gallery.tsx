@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Settings, ChevronRight, HelpCircle } from 'lucide-react';
+import { Settings, ChevronRight, HelpCircle, Circle, Wind, Music } from 'lucide-react';
 import Header from '../components/ui/Header';
 import BottomNav from '../components/ui/BottomNav';
 import { useAppStore } from '../store/useAppStore';
@@ -9,6 +9,14 @@ const pageVariants = {
   initial: { opacity: 0, x: 50 },
   in: { opacity: 1, x: 0 },
   out: { opacity: 0, x: -50 }
+};
+
+const getCategoryIcon = (category: string) => {
+  const cat = category.toLowerCase();
+  if (cat === 'percussion') return <Circle className="w-8 h-8 text-vm-purple-500/80" />;
+  if (cat === 'wind') return <Wind className="w-8 h-8 text-vm-purple-500/80" />;
+  if (cat === 'string') return <Music className="w-8 h-8 text-vm-purple-500/80" />;
+  return <div className="w-8 h-8 bg-vm-purple-500/50 rounded-full animate-pulse" />;
 };
 
 export default function Gallery() {
@@ -50,7 +58,7 @@ export default function Gallery() {
                 className="glass-regular p-4 rounded-2xl flex items-center cursor-pointer hover:bg-white/10 transition-colors group"
               >
                 <div className="w-16 h-16 glass-thick rounded-xl mr-4 flex items-center justify-center overflow-hidden">
-                  <div className="w-8 h-8 bg-vm-purple-500/50 rounded-full animate-pulse" />
+                  {getCategoryIcon(inst.category)}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-white text-lg">{inst.name}</h3>
