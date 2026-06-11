@@ -149,7 +149,7 @@ export default function ARViewer() {
     setStrokes(prev => [...prev, { id: newHit.id, points: [{ x: e.clientX, y: e.clientY }] }]);
 
     // Play Audio logic (for hit and hold)
-    if (instrument.id === 'kompang' || instrument.id === 'serunai' || instrument.id === 'sape') {
+    if (instrument.id === 'kompang' || instrument.id === 'serunai') {
       playInteractionAudio();
     }
   };
@@ -160,10 +160,13 @@ export default function ARViewer() {
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isPlayMode || !audioRef.current) return;
 
+    // Only process movements when clicking/holding (dragging)
+    if (currentStrokeId === null) return;
+
     const now = Date.now();
     const pos = { x: e.clientX, y: e.clientY };
 
-    // Sape strumming via mouse movement (even without clicking)
+    // Sape strumming (click and drag)
     if (instrument.id === 'sape') {
       if (lastMousePos.current && now - lastMoveTime.current > 50) {
         const dx = pos.x - lastMousePos.current.x;
@@ -180,14 +183,12 @@ export default function ARViewer() {
             audio.currentTime = 0;
             audio.play();
             
-            // Visual feedback for mouse strum
-            if (currentStrokeId === null) {
-              const newHit = { id: Date.now(), x: pos.x, y: pos.y };
-              setVisualHits(prev => [...prev, newHit]);
-              setTimeout(() => {
-                setVisualHits(prev => prev.filter(hit => hit.id !== newHit.id));
-              }, 800);
-            }
+            // Visual feedback for strum
+            const newHit = { id: Date.now(), x: pos.x, y: pos.y };
+            setVisualHits(prev => [...prev, newHit]);
+            setTimeout(() => {
+              setVisualHits(prev => prev.filter(hit => hit.id !== newHit.id));
+            }, 800);
           }
         }
       }
@@ -196,14 +197,12 @@ export default function ARViewer() {
     }
     
     // Append to current stroke if dragging
-    if (currentStrokeId !== null) {
-      setStrokes(prev => prev.map(s => {
-        if (s.id === currentStrokeId) {
-          return { ...s, points: [...s.points, pos] };
-        }
-        return s;
-      }));
-    }
+    setStrokes(prev => prev.map(s => {
+      if (s.id === currentStrokeId) {
+        return { ...s, points: [...s.points, pos] };
+      }
+      return s;
+    }));
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -320,14 +319,14 @@ export default function ARViewer() {
               key={stroke.id}
               d={d}
               fill="none"
-              stroke="#8B5CF6"
-              strokeWidth="6"
+              stroke="rgba(139,92,246,0.4)"
+              strokeWidth="16"
               strokeLinecap="round"
               strokeLinejoin="round"
-              initial={{ opacity: 1 }}
-              animate={currentStrokeId === stroke.id ? { opacity: 1 } : { opacity: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              style={{ filter: 'drop-shadow(0 0 8px rgba(139,92,246,0.8))' }}
+              initial={{ opacity: 1, strokeWidth: 16 }}
+              animate={currentStrokeId === stroke.id ? { opacity: 1, strokeWidth: 16 } : { opacity: 0, strokeWidth: 24 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              style={{ filter: 'drop-shadow(0 0 12px rgba(139,92,246,0.6))' }}
             />
           );
         })}
