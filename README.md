@@ -1,5 +1,7 @@
 # VirtualMuse: High-Fidelity WebAR Museum Prototype
 
+**Production URL:** [https://virtualmuse.vercel.app/](https://virtualmuse.vercel.app/)
+
 VirtualMuse is a premium, interactive WebAR experience designed to showcase traditional Malaysian musical instruments (Kompang, Serunai, Sape). This prototype bridges digital archiving with tactile education using an Apple-inspired HUD aesthetic.
 
 ## 📂 Project Structure & Navigation
